@@ -12,48 +12,47 @@ mutex = Semaphore(1)
 count = 1
 
 # cozinheiro
-def cook():
+def cozinheiro():
     global count
     while True:
         cozinha.acquire() # wait cozinha
         enche_travessa()
         for _ in range(M):
-            comida.release()
+            comida.release() # signal comida
         count = M
         enchendo.release()
 
 # canibal
-def savage():
+def canibal():
     global count
     while True:
-        comida.acquire()
-        mutex.acquire()
-        count -= 1
-        if count == 0:
-            cozinha.release() # signal
-            enchendo.acquire()
-        mutex.release()
+        comida.acquire() # wait comida
+        mutex.acquire() # wait mutex
+        count -= 1 # diminui uma porção 
+        if count == 0: # se nao tiver mais porções
+            cozinha.release() # signal cozinha 
+            enchendo.acquire() # wait enchendo
+        mutex.release() 
         come()
 
 # Função para simular o ato de comer
 def come():
     print("Canibal come")
 
-# Função fictícia para encher a travessa
+# Função para simular a ação de encher a travessa
 def enche_travessa():
     print("Cozinheiro enche o pote")
 
 # Função para iniciar o jantar dos canibais
-def dining_savages():
-    cook_thread = Thread(target=cook)
+def jantar_canibais():
+    cozinheiro_thread = Thread(target=cozinheiro)
 
-    savage_threads = []
+    canibal_threads = []
     for _ in range(N):
-        savage_thread = Thread(target=savage)
-        savage_threads.append(savage_thread)
-        savage_thread.start()
+        canibal_thread = Thread(target=canibal)
+        canibal_threads.append(canibal_thread)
+        canibal_thread.start()
 
-    cook_thread.start()
+    cozinheiro_thread.start()
 
-# Iniciar o jantar dos canibais
-dining_savages()
+jantar_canibais()
